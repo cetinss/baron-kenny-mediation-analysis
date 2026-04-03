@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual env
+.venv/
+venv/
+
+# Output artifacts
+Reports/
+*.png
+*.pdf
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/

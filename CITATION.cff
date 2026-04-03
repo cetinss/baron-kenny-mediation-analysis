@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+title: "Public Reproducibility Repository: Caffeine, Stress, and Sleep Mediation Analysis"
+message: "If you use this repository, please cite it using this metadata."
+type: software
+authors:
+  - family-names: "Cetin"
+    given-names: "Sena"
+  - family-names: "Oztoprak"
+    given-names: "Elif Beyza"
+version: "1.0.0"
+date-released: "2026-03-30"
+url: "https://github.com/cetinss/baron-kenny-mediation-analysis"
+license: "MIT"
