@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-09-21T07:39:16+00:00",
+  "generated_utc": "2026-09-21T18:12:52+00:00",
   "bkmediation_version": "1.0.0",
   "python": "3.13.5",
   "python_full": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
@@ -20,11 +20,11 @@
     "alpha": 0.05
   },
   "git": {
-    "commit": "50a97ab8fbe241600b6796c49b9fe236efa75bbd",
-    "commit_short": "50a97ab8",
+    "commit": "5eecc8fd66b3d350a4c190ca52b916263477065a",
+    "commit_short": "5eecc8fd",
     "branch": "revision-1",
     "remote": "https://github.com/cetinss/baron-kenny-mediation-analysis.git",
-    "dirty": true,
-    "last_commit_date": "2026-09-21T10:39:12+03:00"
+    "dirty": false,
+    "last_commit_date": "2026-09-21T21:12:38+03:00"
   }
 }
