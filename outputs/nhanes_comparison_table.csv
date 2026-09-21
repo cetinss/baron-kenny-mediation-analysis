@@ -1,0 +1,7 @@
+Variable,CoffeeHealth_Mean,CoffeeHealth_SD,NHANES_n300_Mean,NHANES_n300_SD,NHANES_Full_Mean,NHANES_Full_SD,NHANES_Full_n
+Caffeine Intake (mg/day),236.45,135.12,166.59,337.23,139.98,220.93,3666
+Sleep Duration (hours),6.65,1.21,7.55,1.52,7.51,1.63,3666
+BMI (kg/m2),23.93,3.84,28.83,7.1,29.83,7.62,3666
+Resting Heart Rate / Pulse (bpm),70.48,9.64,71.91,11.61,72.52,11.7,3666
+Physical Activity (h/week),7.49,4.32,14.41,21.15,15.24,21.5,3666
+Age (years),34.77,10.92,42.65,14.74,42.58,14.6,3666

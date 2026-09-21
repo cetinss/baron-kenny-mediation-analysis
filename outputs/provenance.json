@@ -1,0 +1,30 @@
+{
+  "generated_utc": "2026-09-21T18:31:13+00:00",
+  "bkmediation_version": "1.0.0",
+  "python": "3.13.5",
+  "python_full": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "packages": {
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "scipy": "1.18.0",
+    "statsmodels": "0.14.6",
+    "matplotlib": "3.11.1",
+    "seaborn": "0.13.2",
+    "pytest": "9.1.1",
+    "pingouin": "0.6.1"
+  },
+  "analysis_settings": {
+    "random_seed": 42,
+    "n_bootstrap": 5000,
+    "alpha": 0.05
+  },
+  "git": {
+    "commit": "33f2274e29c79c3b35108ea48aabd2942be1bc95",
+    "commit_short": "33f2274e",
+    "branch": "revision-1",
+    "remote": "https://github.com/cetinss/baron-kenny-mediation-analysis.git",
+    "dirty": false,
+    "last_commit_date": "2026-09-21T21:31:11+03:00"
+  }
+}

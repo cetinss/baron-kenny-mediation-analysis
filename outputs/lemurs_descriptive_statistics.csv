@@ -1,0 +1,5 @@
+Variable,n,Mean,SD,Median,Min,Max
+Caffeine Exposure Score (0-6 drink types),2953,1.02,1.08,1.0,0.0,5.0
+PSS-10 Total Score (0-40),2953,15.824,7.014,16.0,0.0,36.0
+Sleep Duration (hours/night),2953,7.195,0.973,7.0,5.8,9.4
+Active Days/Week (0-21),2953,10.482,3.594,10.0,1.0,20.0

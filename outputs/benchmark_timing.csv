@@ -1,0 +1,5 @@
+Stage,Median seconds,Min seconds,Max seconds,Repeats
+load_and_clean,0.0256,0.0254,0.027,3
+fit_paths,0.0155,0.0154,0.0159,3
+bootstrap_5000,10.559,10.3276,10.8251,3
+TOTAL (single analysis),10.6001,,,3
