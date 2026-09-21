@@ -24,7 +24,7 @@ N_BOOTSTRAP = 5000
 ALPHA = 0.05
 
 # ---- Model specification ----------------------------------------------------
-# Exposure is reported per 100 mg of caffeine (Reviewer 3, S9): 100 mg is
+# Exposure is reported per 100 mg of caffeine: 100 mg is
 # roughly one standard cup of filter coffee, so a one-unit change on this
 # scale is an interpretable quantity, unlike a 1 mg change.
 CAFFEINE_SCALE = 100.0
@@ -39,8 +39,8 @@ STRESS_LEVELS = ("Low", "Medium", "High")
 
 # Gender coding. "three_level" is the corrected default: Female is the
 # reference category and Male / Other each get their own indicator, so
-# respondents who selected "Other" are no longer pooled with women
-# (Reviewer 3, Methods comment). "binary_male" reproduces the original
+# respondents who selected "Other" are no longer pooled with women.
+# "binary_male" reproduces the original
 # Male = 1 / everyone else = 0 coding for backward compatibility.
 GENDER_SCHEMES = ("three_level", "binary_male")
 DEFAULT_GENDER_SCHEME = "three_level"
@@ -75,6 +75,6 @@ MEDIATOR = "Stress_Score"
 OUTCOME = "Sleep_Hours"
 
 # ---- Robust inference -------------------------------------------------------
-# Heteroskedasticity-consistent covariance for the reported standard errors
-# (Reviewer 3, S9 / general comment). "nonrobust" restores classical OLS SEs.
+# Heteroskedasticity-consistent covariance for the reported standard errors;
+# "nonrobust" restores classical OLS SEs.
 DEFAULT_COV_TYPE = "HC3"

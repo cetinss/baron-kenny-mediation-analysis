@@ -82,7 +82,7 @@ class TestSampleDefinitions:
         return compare_sample_definitions(n_boot=300)
 
     def test_full_raw_keeps_all_ten_thousand_rows(self, table):
-        """Reviewer 2's request: the dataset processed in its raw state."""
+        """The dataset processed in its raw state, with nothing excluded."""
         raw = table.set_index("Sample").loc["full_raw"]
         assert raw["n"] == 10000
         assert raw["Excluded from raw"] == 0
@@ -107,4 +107,4 @@ class TestSampleDefinitions:
     def test_markdown_states_the_raw_sample_size(self, table):
         text = sample_definition_markdown(table)
         assert "10,000" in text
-        assert "Reviewer 2" in text
+        assert "raw state" in text

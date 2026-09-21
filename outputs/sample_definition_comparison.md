@@ -1,6 +1,6 @@
 # Sample definition sensitivity: the full raw dataset (n = 10,000)
 
-Reviewer 2 asked for the dataset to be analysed in its raw state, with the full n = 10,000 retained. The model below is re-estimated under four nested sample definitions, changing one exclusion rule at a time, so the cost of each rule is visible rather than argued for. Nothing else differs: same variables, same covariates, same estimator, same seed and same number of bootstrap resamples.
+The dataset is also analysed in its raw state, with the full n = 10,000 retained. The model below is re-estimated under four nested sample definitions, changing one exclusion rule at a time, so the cost of each rule is visible rather than argued for. Nothing else differs: same variables, same covariates, same estimator, same seed and same number of bootstrap resamples.
 
 | Sample       | Definition                                                  |     n |   Excluded from raw |          a |         b |           c |           c' |         a*b |   a*b CI low |   a*b CI high |   Prop. mediated (%) |   Prop. CI low (%) |   Prop. CI high (%) | Conclusion        |
 |:-------------|:------------------------------------------------------------|------:|--------------------:|-----------:|----------:|------------:|-------------:|------------:|-------------:|--------------:|---------------------:|-------------------:|--------------------:|:------------------|

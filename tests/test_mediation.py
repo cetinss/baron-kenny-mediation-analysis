@@ -58,7 +58,7 @@ class TestPathRecovery:
 
         The manuscript describes mean-centring; the main pipeline does not
         centre. This test shows the two descriptions are equivalent for the
-        reported quantities (Reviewer 3, Methods comment).
+        reported quantities.
         """
         X, M, Y, C = _arrays(simulated, sim_covariates)
         raw, _ = fit_paths(X, M, Y, C)

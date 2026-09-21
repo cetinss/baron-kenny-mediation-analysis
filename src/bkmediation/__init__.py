@@ -7,7 +7,7 @@ The package implements the analysis reported in
      caffeine intake and sleep duration"
 
 as a set of documented, independently testable modules rather than a single
-analysis script (Reviewer 3, general comment on the GitHub repository).
+analysis script.
 
 Public API
 ----------

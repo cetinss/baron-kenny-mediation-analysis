@@ -137,6 +137,18 @@ repository versions are written to `outputs/provenance.json` and
 `outputs/provenance.md` on every run. `outputs/benchmark_report.md` records
 runtime, scaling behaviour and agreement with other mediation software.
 
+## Data sources and licensing
+
+The MIT licence in `LICENSE` covers the code in this repository. The bundled
+datasets are third-party material, redistributed here so the analysis can be
+reproduced, and remain under their own terms:
+
+| Dataset | Source | Status |
+|---|---|---|
+| `data/synthetic_coffee_health_10000.csv` | Global Coffee Health Dataset, L. Tharmalingam (Kaggle) | Synthetic; cite the original Kaggle entry |
+| `data/lemurs/` | LEMURS differentially private synthetic release (AIM, eps = 5) | Cite Ghasemizade et al., *JAMIA Open*, as the dataset README requires |
+| `data/nhanes/*.XPT` | NHANES 2017-2018, CDC / NCHS | US public domain |
+
 ## Citation
 
 Please cite this repository using `CITATION.cff`.

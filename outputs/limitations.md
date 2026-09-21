@@ -1,6 +1,6 @@
 # LEMURS Dış Doğrulama — Sınırlılıklar
 
-Bu doküman, `lemurs_validation_results.md`'deki dış doğrulama analizinin tüm proxy/varsayım noktalarını ve LEMURS'un veri statüsünü, hakem yanıtında doğrudan kullanılabilecek netlikte özetler.
+Bu doküman, `lemurs_validation_results.md`'deki dış doğrulama analizinin tüm proxy/varsayım noktalarını ve LEMURS'un veri statüsünü açık biçimde özetler.
 
 ---
 
@@ -41,7 +41,7 @@ Orijinal analizde stres, validasyonu belgelenmemiş, keyfi bir 3-kategori kodlam
 LEMURS README'si bir `record_id` (katılımcı kimliği) kolonu belgeliyor, ancak indirilen `survey_syn_5.csv` dosyasında bu kolon **fiilen yok** (doğrulandı: ham CSV başlığı + codebook, 90 kolon). Bu nedenle:
 - Kişi-bazlı ortalamaya indirgeme yapılamadı.
 - Cluster-robust standart hatalı duyarlılık analizi yapılamadı.
-- Analiz, 3,852 person-week satırını **bağımsız kesitsel gözlemler** olarak ele aldı (kullanıcı onayıyla).
+- Analiz, 3,852 person-week satırını **bağımsız kesitsel gözlemler** olarak ele almak zorunda kaldı; bu sınırlılığın sayısal etkisi `lemurs_clustering_sensitivity.md` dosyasında ayrıca değerlendirilmiştir.
 
 Bu, aynı kişiye ait birden fazla haftalık gözlemin birbiriyle korelasyonlu olabileceği (within-person autocorrelation) ihtimalini modele yansıtamadığımız anlamına gelir — standart hatalar hafifçe olduğundan düşük tahmin edilmiş olabilir (anti-konservatif). Ancak path a ve b'nin p değerleri (<.001) bu tahmin hatasını tolere edecek kadar güçlü; asıl marjinal olan toplam etki (c, p=.089) bu belirsizlikten etkilenmiş olabilir.
 
@@ -62,9 +62,9 @@ R² (0.629 vs 0.007) ve oran-mediated (%60.6 vs %23.3) değerleri **doğrudan ka
 
 ---
 
-## 5. Hakem-2 eleştirisine yanıt gücü ve kalan zayıf noktalar (özet)
+## 5. Dış doğrulamanın kanıt gücü ve kalan zayıf noktalar (özet)
 
-Ayrıntılı değerlendirme sohbet sonunda sunulmuştur; bu bölüm sadece dosya-içi hızlı referans içindir:
+Bu bölüm, yukarıdaki ayrıntıların dosya-içi hızlı referansıdır:
 
 - **Güçlü yön:** Bağımsız, farklı üretim yöntemiyle (DP + hakemli doğrulama) elde edilmiş bir veri setinde, tüm path'lerde işaret tutarlılığı ve 3/5 path'te anlamlılık tutarlılığı gösterilmiştir.
 - **Zayıf yön:** Toplam etki (c) ve doğrudan etki (c′) LEMURS'ta anlamlı değil; kafein proxy'sinin kabalığı ve record_id eksikliği bu zayıflığın en olası kaynaklarıdır ve bunlar giderilemeyen, kaynak-veri-kaynaklı sınırlılıklardır (icat edilerek düzeltilmemiştir).

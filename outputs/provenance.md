@@ -1,6 +1,6 @@
 # Computational Provenance
 
-Generated: 2026-09-21T18:12:52+00:00 (UTC)
+Generated: 2026-09-21T18:18:19+00:00 (UTC)
 
 ## Environment
 
@@ -30,10 +30,10 @@ Generated: 2026-09-21T18:12:52+00:00 (UTC)
 
 | Item | Value |
 |---|---|
-| Commit | `5eecc8fd66b3d350a4c190ca52b916263477065a` |
+| Commit | `fe039d57cd444abafd50f0ec8cf0502e351c62ab` |
 | Branch | revision-1 |
 | Remote | https://github.com/cetinss/baron-kenny-mediation-analysis.git |
-| Working tree | clean |
-| Last commit date | 2026-09-21T21:12:38+03:00 |
+| Working tree | modified (uncommitted changes present) |
+| Last commit date | 2026-09-21T21:12:54+03:00 |
 
-Re-running `python -m bkmediation all` at this commit, with this seed and these package versions, reproduces every number in the reports and figures.
+The working tree held uncommitted changes when this run was made, so the commit above identifies the last committed state rather than the exact code that produced these numbers. Re-run after committing to obtain a fully pinned provenance record.

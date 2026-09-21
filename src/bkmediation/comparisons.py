@@ -2,17 +2,17 @@
 
 Two comparisons live here.
 
-**Sample definition.** Reviewer 2 asked for the analysis to be repeated on the
-dataset in its raw state, with the full n = 10,000 retained, rather than only
-on the cleaned analytic sample. `compare_sample_definitions` re-estimates the
+**Sample definition.** The analysis is also run on the dataset in its raw
+state, with the full n = 10,000 retained, rather than only on the cleaned
+analytic sample. `compare_sample_definitions` re-estimates the
 model under four nested sample definitions - the full raw file, the age filter
 alone, the primary 1.5xIQR sample, and a permissive 3xIQR rule - so the effect
 of every exclusion rule is visible in one table rather than argued for.
 
 **Gender coding.** The original pipeline coded
 gender as Male = 1 and everyone else = 0, which pooled the 221 respondents who
-reported "Other" with women. Reviewer 3 asked for that to be corrected. The
-corrected coding (Female reference, separate Male and Other indicators) is now
+reported "Other" with women. The corrected coding (Female reference, separate
+Male and Other indicators) is now
 the package default; this module re-estimates the model under the old coding
 as well, so that the change is documented with numbers rather than asserted.
 """
@@ -59,8 +59,8 @@ SAMPLE_DEFINITIONS = (
 def compare_sample_definitions(n_boot: int = N_BOOTSTRAP, seed: int = RANDOM_SEED) -> pd.DataFrame:
     """Re-estimate the mediation model under each sample definition.
 
-    The full raw row is the specification Reviewer 2 asked for: the dataset
-    exactly as distributed, n = 10,000, with no exclusion of any kind.
+    The full raw row is the dataset exactly as distributed, n = 10,000, with
+    no exclusion of any kind.
     """
     rows = []
     for key, label, kwargs in SAMPLE_DEFINITIONS:
@@ -95,8 +95,8 @@ def sample_definition_markdown(table: pd.DataFrame | None = None) -> str:
     lines = [
         "# Sample definition sensitivity: the full raw dataset (n = 10,000)",
         "",
-        "Reviewer 2 asked for the dataset to be analysed in its raw state, with "
-        "the full n = 10,000 retained. The model below is re-estimated under four "
+        "The dataset is also analysed in its raw state, with the full "
+        "n = 10,000 retained. The model below is re-estimated under four "
         "nested sample definitions, changing one exclusion rule at a time, so the "
         "cost of each rule is visible rather than argued for. Nothing else "
         "differs: same variables, same covariates, same estimator, same seed and "

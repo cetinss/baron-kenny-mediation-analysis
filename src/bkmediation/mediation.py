@@ -4,7 +4,7 @@ What this module reports, and why
 ---------------------------------
 * Every path (a, b, c, c') is reported with a standard error, a t statistic,
   a p value AND a 95% confidence interval - both a model-based interval and a
-  percentile-bootstrap interval (Reviewer 3, S9).
+  percentile-bootstrap interval.
 * Standard errors are heteroskedasticity-consistent (HC3) by default; the
   classical OLS interval is reported alongside so the two can be compared.
 * Coefficients on the exposure are additionally expressed per 100 mg of
@@ -16,9 +16,9 @@ What this module reports, and why
   ratio a*b/c is a highly unstable quantity.
 * Cohen's f2 is computed for the increment in explained variance when the
   mediator enters the outcome model, and is labelled as exactly that. It is
-  NOT a mediation effect size and must not be interpreted as one
-  (Reviewer 3, S9); the mediation effect sizes are the (standardised)
-  indirect effect and the proportion mediated.
+  NOT a mediation effect size and must not be interpreted as one; the
+  mediation effect sizes are the (standardised) indirect effect and the
+  proportion mediated.
 
 Nothing in this module identifies a causal effect. With cross-sectional data
 and a mediator that is measured (or, in the synthetic dataset, generated) at

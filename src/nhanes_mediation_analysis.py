@@ -23,7 +23,7 @@ Survey design (why this differs from main.py / lemurs_validation.py)
 NHANES uses a complex, multistage, stratified cluster sample with unequal
 selection probabilities. Analyzing it with unweighted OLS, as if it were a
 simple random sample, would misrepresent the US population and is a common,
-well-known reviewer objection. Because the exposure (caffeine) comes from
+well-known methodological objection. Because the exposure (caffeine) comes from
 the one-day dietary recall domain, the appropriate weight is the Day-1
 dietary sample weight WTDRD1 (per NHANES analytic guidelines for dietary
 variables), and precision must account for the design strata (SDMVSTRA) and

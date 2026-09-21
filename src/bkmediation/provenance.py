@@ -1,9 +1,9 @@
 """Computational provenance: versions, seed, git commit, platform, timing.
 
-Reviewer 3 asked that the exact Python and package versions, the random seed
-and the GitHub commit be reported so that a reader can reconstruct the
-computational environment. `collect_provenance()` gathers them, and the
-analysis entry points write the result next to their outputs.
+The exact Python and package versions, the random seed and the Git commit are
+recorded so that a reader can reconstruct the computational environment.
+`collect_provenance()` gathers them, and the analysis entry points write the
+result next to their outputs.
 """
 
 from __future__ import annotations

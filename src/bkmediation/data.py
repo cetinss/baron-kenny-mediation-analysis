@@ -122,7 +122,7 @@ def encode_gender(df: pd.DataFrame, scheme: str = DEFAULT_GENDER_SCHEME):
     scheme="three_level"  Female is the reference category; `Gender_Male` and
                           `Gender_Other` are separate indicators, so
                           respondents who selected "Other" are NOT pooled with
-                          women (Reviewer 3, Methods comment).
+                          women.
     scheme="binary_male"  legacy Male = 1 / not-Male = 0 single indicator.
 
     `Gender_Num` is always written as well, because the external-validation

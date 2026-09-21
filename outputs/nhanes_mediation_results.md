@@ -104,13 +104,11 @@ Erkek oranı: %46.9.
 
 ---
 
-## 6. "Major Revision" Sorusuna Dürüst Değerlendirme
+## 6. Bu Analizin Kanıt Değeri
 
-Bu analiz, gerçek/resmi bir veri setiyle kurulmuş, tasarım-farkında (survey-weighted, cluster-robust, stratified bootstrap) bir mediation çalışmasıdır — metodolojik olarak "sentetik veri" eleştirisinin bir kademe ötesine geçer. Ama bir null bulgu ile geldi. Bu **iyi ya da kötü değil, dürüst** — ve tezde şu şekillerde kullanılabilir:
-- **Ek bir bölüm/duyarlılık analizi olarak:** "Farklı bir gerçek veri setinde, farklı bir psikolojik yapıyla (depresif belirtiler), mediation bulunamamıştır — bu, orijinal bulgunun stres-spesifik olduğunu ve genellenebilirliğinin dikkatle sınırlandırılması gerektiğini gösterir." Bu çerçeve, hakemlere sizin sınırlılıkları içtenlikle araştırdığınızı gösterir — genelde olumlu karşılanır.
-- **Riskler:** Bir hakem "neden PSS yerine PHQ-9 kullandınız" diye sorabilir (yapı ikamesini net açıklamak şart, bu raporda yapıldı); bir başkası kesitsel-veri + mediation nedensellik sorununu gündeme getirebilir (her üç analizde de ortak bir sınırlılık, ayrı bir savunma gerektirmez).
+Bu analiz, gerçek ve resmi bir veri setiyle kurulmuş, tasarım-farkında (survey-weighted, cluster-robust, stratified bootstrap) bir aracılık çalışmasıdır. Katkısı şudur: farklı bir gerçek veri setinde, farklı bir psikolojik yapıyla (depresif belirtiler) aracılık bulunamamıştır. Bu, sentetik veri setindeki bulgunun stres yapısına özgü olabileceğini gösterir ve sonucun kapsamını daraltır.
 
-**Sonuç:** Bu ek analiz, "major revision alır mısınız" sorusuna kesin bir "hayır" garantisi vermez (hiçbir analiz veremez), ama elinizdeki kanıt tabanını nitel olarak güçlendirir: artık üç farklı veri kalitesi seviyesinde (sentetik → DP-sentetik-ama-doğrulanmış → tam gerçek/resmi) tutarlı bir metodolojik disiplin ve şeffaflıkla çalışılmış bir dosyanız var.
+Yorumlanırken dikkat edilmesi gerekenler: PHQ-9 algılanan stresin yerine geçen bir ölçüm değildir, depresif belirtileri ölçer (yapı ikamesi yukarıda ayrıntılandırılmıştır); ve kesitsel veriyle kurulan aracılık modelleri nedensel sıralamayı tanımlamaz. Bu nedenle buradaki null bulgu, stres aracılığının yokluğunun kanıtı değil, farklı bir yapıyla test edildiğinde tekrarlanmadığının kaydıdır.
 
 **İlgili dosyalar:** `outputs/nhanes_mediation_analytic_sample.csv`, `outputs/figures/NHANES_Med_Fig1-4`, `src/nhanes_mediation_analysis.py`
 

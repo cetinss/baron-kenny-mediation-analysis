@@ -1,8 +1,8 @@
 """Runtime, scalability and cross-software agreement benchmarks.
 
-Reviewer 3 asked for the computational side of the pipeline to be reported:
-how long it runs, how it scales, and whether its numbers agree with
-established mediation software.
+The computational side of the pipeline is reported here: how long it runs,
+how it scales, and whether its numbers agree with established mediation
+software.
 
 Three things are measured:
 

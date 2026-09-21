@@ -1,9 +1,8 @@
 """Formal evaluation of the three study hypotheses (H1-H3).
 
-Reviewer 3 asked for the hypotheses to be stated explicitly rather than left
-implicit in the narrative (S2). They are stated here in the code as well, so
-that each one has a single, auditable decision rule and the manuscript text
-and the analysis cannot drift apart.
+The hypotheses are stated here in the code as well as in the manuscript, so
+that each one has a single, auditable decision rule and the text and the
+analysis cannot drift apart.
 
     H1  Higher daily caffeine intake is associated with SHORTER sleep
         duration.

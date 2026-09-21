@@ -213,7 +213,7 @@ def run_mediation(df, cov_col="activity_days", label="PRIMARY"):
     # c, c') and therefore the indirect effect are numerically identical to
     # the uncentred main analysis in src/main.py. Centring is kept here for
     # interpretability of the intercepts, and tests/test_mediation.py asserts
-    # the invariance (Reviewer 3: text and code must agree on this point).
+    # the invariance, so that the text and the code agree on this point.
     Xc = X - X.mean()
     Mc = M - M.mean()
     Cc = C - C.mean(axis=0)

@@ -1,6 +1,6 @@
 # Sensitivity Analysis 3: Mediator-Outcome Confounding & Reverse Causation
 
-**Purpose.** Reviewer 2 noted that the bootstrap CI for the indirect effect does not rule out unmeasured confounding or reverse causality, and asked for an alternative directional model and a confounding sensitivity analysis.
+**Purpose.** A bootstrap CI for the indirect effect does not rule out unmeasured confounding or reverse causality, so an alternative directional model and a confounding sensitivity analysis are reported here.
 
 ## (a) Reverse-ordering alternative model: Caffeine -> Sleep Duration -> Stress
 

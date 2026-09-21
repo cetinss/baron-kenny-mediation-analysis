@@ -1,6 +1,6 @@
 # Sensitivity Analysis 1: Stress-Coding Scheme
 
-**Purpose.** Reviewer 2 asked whether the arbitrary equal-interval coding of the mediator (Low=2, Medium=5, High=8) was justified, and requested that alternative codings, indicator variables, or an ordinal mediator model be used to test whether conclusions depend on this modelling choice.
+**Purpose.** The equal-interval coding of the mediator (Low=2, Medium=5, High=8) is an assumption rather than a measurement. Alternative codings, indicator variables and an ordinal mediator model are used here to test whether the conclusions depend on that modelling choice.
 
 **Mathematical note.** Because the indirect effect is a product of two linear-regression coefficients (a x b), it is invariant to any purely affine rescaling of the mediator (a linear transform of M rescales a and b reciprocally, leaving a*b unchanged). Equal-interval recodings such as 1/2/3 therefore cannot, by construction, change the indirect effect and are included only to make this invariance explicit. The informative tests are the **non-equal-interval** codings (which assume a different functional form for the ordinal-to-numeric mapping) and the **indicator-variable** coding (which assumes no numeric spacing at all).
 

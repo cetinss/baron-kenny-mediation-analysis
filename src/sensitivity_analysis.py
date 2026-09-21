@@ -3,8 +3,8 @@
 Sensitivity Analyses for the Baron-Kenny Mediation Model
 Caffeine Intake -> Perceived Stress -> Sleep Duration
 
-Addresses JIENS Reviewer 2 (Major Revision) requests that are not covered by
-the external-validation scripts (lemurs_validation.py, nhanes_mediation*.py):
+Robustness checks that are not covered by the external-validation scripts
+(lemurs_validation.py, nhanes_mediation*.py):
 
   1. Stress-coding sensitivity - does the arbitrary equal-interval coding of
      the mediator (Low=2, Medium=5, High=8) drive the reported mediation, or
@@ -13,7 +13,7 @@ the external-validation scripts (lemurs_validation.py, nhanes_mediation*.py):
      coding, native-ordinal treatment of the mediator)?
   2. Outlier-threshold / robust-regression sensitivity - does the 1.5xIQR
      exclusion rule (which drops both exposure- and outcome-side "outliers"
-     and could induce selection bias per Reviewer 2) change the conclusion
+     and could therefore induce selection bias) change the conclusion
      versus raw (uncleaned) data, a more permissive 3xIQR rule, and
      heteroskedasticity-robust (HC3) / Huber M-estimation (RLM) regression?
   3. Mediator-outcome confounding / reverse-causation sensitivity - a
@@ -86,7 +86,7 @@ _fmt_p = lambda p: "<0.001" if p < 0.001 else f"{p:.3f}"
 def _bootstrap_indirect(X, M, Y, C, n_boot, estimator="ols", seed=SEED):
     # A dedicated RandomState per call, so each reported interval depends only
     # on its own seed and not on how many random draws earlier sections of the
-    # script happened to consume (Reviewer 3: reproducibility).
+    # script happened to consume, which keeps each interval reproducible.
     rs = np.random.RandomState(seed)
     n = len(X)
     boot = np.empty(n_boot)
@@ -274,11 +274,11 @@ def section1_stress_coding(df):
     lines = []
     lines.append("# Sensitivity Analysis 1: Stress-Coding Scheme\n")
     lines.append(
-        "**Purpose.** Reviewer 2 asked whether the arbitrary equal-interval "
-        "coding of the mediator (Low=2, Medium=5, High=8) was justified, and "
-        "requested that alternative codings, indicator variables, or an "
-        "ordinal mediator model be used to test whether conclusions depend "
-        "on this modelling choice.\n"
+        "**Purpose.** The equal-interval coding of the mediator (Low=2, "
+        "Medium=5, High=8) is an assumption rather than a measurement. "
+        "Alternative codings, indicator variables and an ordinal mediator "
+        "model are used here to test whether the conclusions depend on that "
+        "modelling choice.\n"
     )
     lines.append(
         "**Mathematical note.** Because the indirect effect is a product of "
@@ -350,9 +350,9 @@ def section1_stress_coding(df):
 def _load_full_raw():
     """Every row in the distributed CSV: no age filter, no outlier rule.
 
-    Reviewer 2 asked for the dataset to be processed in its raw state with the
-    full n = 10,000 retained. The file has no missing values on any analysis
-    variable, so this really is all 10,000 rows.
+    This is the dataset in its raw state with the full n = 10,000 retained. The
+    file has no missing values on any analysis variable, so this really is all
+    10,000 rows.
     """
     return bk.build_analytic_sample(age_range=(0, 200), outlier_k=None).df
 
@@ -375,7 +375,7 @@ def section2_outlier_robustness():
     print("=" * 70)
 
     # "full raw" is the dataset exactly as distributed - every row, no age
-    # filter, no outlier rule (Reviewer 2's request to keep n = 10,000). The
+    # filter, no outlier rule, keeping the full n = 10,000. The
     # remaining rows add the age filter and then vary the outlier threshold.
     variants = {
         "Full raw dataset (n=10,000, no age filter)": "full_raw",
@@ -432,11 +432,10 @@ def section2_outlier_robustness():
     lines = []
     lines.append("# Sensitivity Analysis 2: Outlier Threshold & Robust Regression\n")
     lines.append(
-        "**Purpose.** Reviewer 2 noted that excluding observations on both "
-        "the exposure and outcome side using the 1.5xIQR rule could induce "
-        "selection bias, and asked for the analysis to be repeated on raw "
-        "(uncleaned) data, with a different threshold, and with robust "
-        "regression.\n"
+        "**Purpose.** Excluding observations on both the exposure and the "
+        "outcome side with the 1.5xIQR rule could induce selection bias, so "
+        "the analysis is repeated on raw (uncleaned) data, with a different "
+        "threshold, and with robust regression.\n"
     )
     lines.append("## Outlier threshold comparison (OLS, classic vs. HC3-robust SE)\n")
     lines.append(df_out.to_markdown(index=False, floatfmt=".6f"))
@@ -552,10 +551,10 @@ def section3_confounding(df, R_baseline):
     lines = []
     lines.append("# Sensitivity Analysis 3: Mediator-Outcome Confounding & Reverse Causation\n")
     lines.append(
-        "**Purpose.** Reviewer 2 noted that the bootstrap CI for the "
-        "indirect effect does not rule out unmeasured confounding or "
-        "reverse causality, and asked for an alternative directional model "
-        "and a confounding sensitivity analysis.\n"
+        "**Purpose.** A bootstrap CI for the indirect effect does not rule "
+        "out unmeasured confounding or reverse causality, so an alternative "
+        "directional model and a confounding sensitivity analysis are "
+        "reported here.\n"
     )
     lines.append("## (a) Reverse-ordering alternative model: Caffeine -> Sleep Duration -> Stress\n")
     lines.append(

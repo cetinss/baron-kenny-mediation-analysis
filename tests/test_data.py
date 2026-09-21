@@ -40,7 +40,7 @@ class TestStressCoding:
 
 class TestGenderCoding:
     def test_other_is_not_pooled_with_women(self, small_frame):
-        """The correction Reviewer 3 asked for."""
+        """Respondents who selected "Other" keep their own category."""
         out, cols = encode_gender(small_frame, "three_level")
         other = out[out["Gender"] == "Other"]
         female = out[out["Gender"] == "Female"]

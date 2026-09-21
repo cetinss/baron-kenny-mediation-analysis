@@ -1,6 +1,6 @@
 # Sensitivity Analysis 2: Outlier Threshold & Robust Regression
 
-**Purpose.** Reviewer 2 noted that excluding observations on both the exposure and outcome side using the 1.5xIQR rule could induce selection bias, and asked for the analysis to be repeated on raw (uncleaned) data, with a different threshold, and with robust regression.
+**Purpose.** Excluding observations on both the exposure and the outcome side with the 1.5xIQR rule could induce selection bias, so the analysis is repeated on raw (uncleaned) data, with a different threshold, and with robust regression.
 
 ## Outlier threshold comparison (OLS, classic vs. HC3-robust SE)
 

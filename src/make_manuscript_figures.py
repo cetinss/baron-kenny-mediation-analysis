@@ -11,8 +11,7 @@ analytic pipeline, so that:
   1. Each figure's internal title matches its caption number in the
      manuscript (Figure 1 ... Figure 8). The previous figure set was numbered
      with an internal section scheme (Figure 0, 1, 2, 3, 4, 5, 6, 6-B) that
-     was off by one relative to the manuscript captions -- the mismatch
-     Reviewer 3 flagged under S9.
+     was off by one relative to the manuscript captions.
   2. Every number shown in a figure is computed from the same cleaned sample
      used for Table 1 and Table 2 (main.load_and_clean_data), so figure and
      table values cannot drift apart.
