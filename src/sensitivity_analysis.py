@@ -26,10 +26,13 @@ the external-validation scripts (lemurs_validation.py, nhanes_mediation*.py):
      zero.
 
 All three sections REUSE the canonical data-loading and mediation machinery
-from main.py (same age filter, same missing-data handling, same covariate
-set) so that the "baseline" numbers reported here are guaranteed identical
-to the ones in the manuscript's Table 2. Only the mediator coding / outlier
-rule / estimator / causal ordering is varied, one at a time.
+from main.py / the bkmediation package (same age filter, same missing-data
+handling, same covariate set), so the "baseline" point estimates reported
+here are identical to the ones in the manuscript's Table 2. Only the mediator
+coding / outlier rule / estimator / causal ordering is varied, one at a time.
+Bootstrap interval bounds are drawn from this script's own RandomState(42) and
+can therefore differ from Table 2's interval in the fifth decimal; that is
+Monte Carlo variation, not a difference in specification.
 
 Outputs (all under outputs/):
   stress_coding_sensitivity.md
@@ -62,11 +65,14 @@ DATA_DIR = PROJECT_DIR / "data"
 OUT_DIR = PROJECT_DIR / "outputs"
 OUT_DIR.mkdir(exist_ok=True)
 
-np.random.seed(42)
+SEED = 42
+np.random.seed(SEED)
 N_BOOTSTRAP = 5000
 N_BOOTSTRAP_ALT = 2000  # reduced for extra thresholds / RLM (still ample precision)
 ALPHA = 0.05
-COVS = ["Age", "Gender_Num", "BMI", "Physical_Activity_Hours", "Heart_Rate"]
+# Same covariate set as the main analysis, including the corrected gender
+# coding (Female reference; separate Male and Other indicators).
+COVS = list(bk.DEFAULT_COVARIATES)
 
 _sig = lambda p: "***" if p < .001 else "**" if p < .01 else "*" if p < .05 else "n.s."
 _fmt_p = lambda p: "<0.001" if p < 0.001 else f"{p:.3f}"
@@ -77,12 +83,16 @@ _fmt_p = lambda p: "<0.001" if p < 0.001 else f"{p:.3f}"
 # (a-model, b-model) pair built from user-supplied design matrices.
 # =============================================================================
 
-def _bootstrap_indirect(X, M, Y, C, n_boot, estimator="ols"):
+def _bootstrap_indirect(X, M, Y, C, n_boot, estimator="ols", seed=SEED):
+    # A dedicated RandomState per call, so each reported interval depends only
+    # on its own seed and not on how many random draws earlier sections of the
+    # script happened to consume (Reviewer 3: reproducibility).
+    rs = np.random.RandomState(seed)
     n = len(X)
     boot = np.empty(n_boot)
     ok = 0
     for _ in range(n_boot):
-        idx = np.random.choice(n, n, replace=True)
+        idx = rs.choice(n, n, replace=True)
         Xb, Mb, Yb, Cb = X[idx], M[idx], Y[idx], C[idx]
         try:
             Za = sm.add_constant(np.column_stack([Xb, Cb]))
@@ -90,7 +100,14 @@ def _bootstrap_indirect(X, M, Y, C, n_boot, estimator="ols"):
             if estimator == "ols":
                 a_b = sm.OLS(Mb, Za).fit().params[1]
                 b_b = sm.OLS(Yb, Zb).fit().params[2]
-            else:  # robust Huber M-estimation
+            elif estimator == "rlm_outcome":
+                # Huber applied only where it is appropriate: the outcome
+                # model, whose dependent variable is continuous. Path a keeps
+                # OLS because its dependent variable is the 3-level stress
+                # score (see _fit_mediation_core).
+                a_b = sm.OLS(Mb, Za).fit().params[1]
+                b_b = RLM(Yb, Zb, M=HuberT()).fit().params[2]
+            else:  # robust Huber M-estimation on both models
                 a_b = RLM(Mb, Za, M=HuberT()).fit().params[1]
                 b_b = RLM(Yb, Zb, M=HuberT()).fit().params[2]
             boot[ok] = a_b * b_b
@@ -103,7 +120,20 @@ def _bootstrap_indirect(X, M, Y, C, n_boot, estimator="ols"):
 
 def _fit_mediation_core(X, M, Y, C, estimator="ols", cov_type=None):
     """Fit path-a and path-b/c' models with a chosen estimator and return
-    point estimates. estimator in {'ols', 'rlm'}; cov_type e.g. 'HC3' for OLS."""
+    point estimates.
+
+    estimator:
+      'ols'          ordinary least squares (cov_type e.g. 'HC3' for robust SEs)
+      'rlm_outcome'  Huber M-estimation for the models whose dependent variable
+                     is sleep duration (total-effect and outcome models), OLS
+                     for path a. This is the preferred robust specification:
+                     M-estimation assumes a continuous response contaminated by
+                     outliers, whereas path a's dependent variable is the
+                     3-level stress score, where the "extreme" values are the
+                     High category itself rather than contamination.
+      'rlm'          Huber M-estimation for all three models, including path a.
+                     Reported for completeness; see the caveat above.
+    """
     Za = sm.add_constant(np.column_stack([X, C]))
     Zb = sm.add_constant(np.column_stack([X, M, C]))
     Zc = sm.add_constant(np.column_stack([X, C]))  # total-effect model
@@ -113,6 +143,10 @@ def _fit_mediation_core(X, M, Y, C, estimator="ols", cov_type=None):
         m_total = sm.OLS(Y, Zc).fit(**fit_kwargs)
         m_a = sm.OLS(M, Za).fit(**fit_kwargs)
         m_b = sm.OLS(Y, Zb).fit(**fit_kwargs)
+    elif estimator == "rlm_outcome":
+        m_total = RLM(Y, Zc, M=HuberT()).fit()
+        m_a = sm.OLS(M, Za).fit()
+        m_b = RLM(Y, Zb, M=HuberT()).fit()
     else:
         m_total = RLM(Y, Zc, M=HuberT()).fit()
         m_a = RLM(M, Za, M=HuberT()).fit()
@@ -193,11 +227,12 @@ def section1_stress_coding(df):
     ab_high = a_high * b_high
 
     n = len(df)
+    rs = np.random.RandomState(SEED)
     boot_med = np.empty(N_BOOTSTRAP_ALT)
     boot_high = np.empty(N_BOOTSTRAP_ALT)
     ok = 0
     for _ in range(N_BOOTSTRAP_ALT):
-        idx = np.random.choice(n, n, replace=True)
+        idx = rs.choice(n, n, replace=True)
         Xb, Cb = X[idx], C[idx]
         Dmb, Dhb, Yb = D_med[idx], D_high[idx], Y[idx]
         try:
@@ -312,23 +347,26 @@ def section1_stress_coding(df):
 # SECTION 2 - OUTLIER-THRESHOLD / ROBUST-REGRESSION SENSITIVITY
 # =============================================================================
 
+def _load_full_raw():
+    """Every row in the distributed CSV: no age filter, no outlier rule.
+
+    Reviewer 2 asked for the dataset to be processed in its raw state with the
+    full n = 10,000 retained. The file has no missing values on any analysis
+    variable, so this really is all 10,000 rows.
+    """
+    return bk.build_analytic_sample(age_range=(0, 200), outlier_k=None).df
+
+
 def _load_variant(k):
-    """Reproduce main.load_and_clean_data()'s age-filter + missing-value
-    handling, then apply the IQR outlier rule at multiplier k (k=None skips
-    outlier removal entirely, i.e. the raw/uncleaned analytic variables)."""
-    raw = pd.read_csv(DATA_DIR / "synthetic_coffee_health_10000.csv")
-    df = raw.copy()
-    df = df[(df["Age"] >= 18) & (df["Age"] <= 65)]
-    stress_map = {"Low": 2, "Medium": 5, "High": 8}
-    df["Stress_Score"] = df["Stress_Level"].map(stress_map)
-    df["Gender_Num"] = (df["Gender"] == "Male").astype(int)
-    key_vars = ["Caffeine_mg", "Stress_Score", "Sleep_Hours", "Age",
-                "Gender_Num", "BMI", "Physical_Activity_Hours", "Heart_Rate"]
-    df = df.dropna(subset=key_vars)
-    if k is not None:
-        continuous = ["Caffeine_mg", "Sleep_Hours", "BMI", "Heart_Rate", "Physical_Activity_Hours"]
-        df = bk._remove_outliers_iqr(df, continuous, k=k)
-    return df
+    """The analytic sample with the IQR outlier rule set to multiplier k.
+
+    k=None skips outlier removal entirely (the raw/uncleaned analytic
+    variables). Everything else - age filter, mediator coding, gender coding,
+    missing-value handling - is the canonical pipeline from
+    bkmediation.data.build_analytic_sample, so the only thing that varies
+    across rows of the outlier table is the exclusion rule itself.
+    """
+    return bk.build_analytic_sample(outlier_k=k, verbose=(k is not None)).df
 
 
 def section2_outlier_robustness():
@@ -336,8 +374,12 @@ def section2_outlier_robustness():
     print("SENSITIVITY 2: OUTLIER THRESHOLD & ROBUST REGRESSION")
     print("=" * 70)
 
+    # "full raw" is the dataset exactly as distributed - every row, no age
+    # filter, no outlier rule (Reviewer 2's request to keep n = 10,000). The
+    # remaining rows add the age filter and then vary the outlier threshold.
     variants = {
-        "Raw (no outlier exclusion)": None,
+        "Full raw dataset (n=10,000, no age filter)": "full_raw",
+        "Raw (18-65, no outlier exclusion)": None,
         "1.5xIQR (manuscript baseline)": 1.5,
         "3xIQR (permissive)": 3.0,
     }
@@ -345,7 +387,7 @@ def section2_outlier_robustness():
     rows = []
     frames = {}
     for name, k in variants.items():
-        df = _load_variant(k)
+        df = _load_full_raw() if k == "full_raw" else _load_variant(k)
         frames[name] = df
         X = df["Caffeine_mg"].values
         M = df["Stress_Score"].values
@@ -378,6 +420,9 @@ def section2_outlier_robustness():
     M = df_base["Stress_Score"].values
     Y = df_base["Sleep_Hours"].values
     C = df_base[COVS].values
+    rlm_out = _fit_mediation_core(X, M, Y, C, estimator="rlm_outcome")
+    ci_lo_ro, ci_hi_ro = _bootstrap_indirect(
+        X, M, Y, C, N_BOOTSTRAP_ALT, estimator="rlm_outcome")
     rlm = _fit_mediation_core(X, M, Y, C, estimator="rlm")
     ci_lo_r, ci_hi_r = _bootstrap_indirect(X, M, Y, C, N_BOOTSTRAP_ALT, estimator="rlm")
 
@@ -403,12 +448,39 @@ def section2_outlier_robustness():
         "estimation itself, rather than only adjusting standard errors, and "
         "is therefore a stronger check on whether a small number of extreme "
         "points drive the reported effects.\n\n"
+        "**Preferred robust specification (Huber on the outcome models only).** "
+        "M-estimation assumes a continuous response contaminated by outliers. "
+        "That holds for sleep duration, but not for path a, whose dependent "
+        "variable is the 3-level stress score: there the \"extreme\" values are "
+        "the High-stress category itself, not contamination, so down-weighting "
+        "them removes signal rather than noise. Path a is therefore kept at "
+        "OLS here and Huber is applied to the total-effect and outcome "
+        "models.\n\n"
+        f"- Path a (OLS, Caffeine -> Stress): a = {rlm_out['a']:.6f}, "
+        f"p = {_fmt_p(rlm_out['a_p'])} ({_sig(rlm_out['a_p'])})\n"
+        f"- Path b (Huber, Stress -> Sleep | Caffeine): b = {rlm_out['b']:.6f}, "
+        f"p = {_fmt_p(rlm_out['b_p'])} ({_sig(rlm_out['b_p'])})\n"
+        f"- Direct effect c' (Huber): {rlm_out['cp']:.6f}, "
+        f"p = {_fmt_p(rlm_out['cp_p'])} ({_sig(rlm_out['cp_p'])})\n"
+        f"- Indirect effect (a*b): {rlm_out['ab']:.6f}, 95% CI "
+        f"[{ci_lo_ro:.6f}, {ci_hi_ro:.6f}] "
+        f"({'excludes 0' if not (ci_lo_ro <= 0 <= ci_hi_ro) else 'includes 0'})\n"
+        f"- Proportion mediated: {rlm_out['prop']:.1f}%\n\n"
+        "**Huber applied to all three models, including path a (reported for "
+        "completeness).**\n\n"
         f"- Path a (Caffeine -> Stress): a = {rlm['a']:.6f}, p = {_fmt_p(rlm['a_p'])} ({_sig(rlm['a_p'])})\n"
         f"- Path b (Stress -> Sleep | Caffeine): b = {rlm['b']:.6f}, p = {_fmt_p(rlm['b_p'])} ({_sig(rlm['b_p'])})\n"
         f"- Direct effect c': {rlm['cp']:.6f}, p = {_fmt_p(rlm['cp_p'])} ({_sig(rlm['cp_p'])})\n"
         f"- Indirect effect (a*b): {rlm['ab']:.6f}, 95% CI [{ci_lo_r:.6f}, {ci_hi_r:.6f}] "
         f"({'excludes 0' if not (ci_lo_r <= 0 <= ci_hi_r) else 'includes 0'})\n"
-        f"- Proportion mediated: {rlm['prop']:.1f}%\n"
+        f"- Proportion mediated: {rlm['prop']:.1f}%\n\n"
+        "The wide, strongly asymmetric interval in this second specification "
+        "comes from path a, not from path b: across bootstrap replicates the "
+        "Huber estimate of a is left-skewed and reaches values close to zero, "
+        "while the Huber estimate of b stays within a narrow band. That "
+        "instability is the artefact of M-estimating a 3-level dependent "
+        "variable described above, which is why the first specification is the "
+        "one to read as the robust-regression check.\n"
     )
     lines.append(
         "## Conclusion\n"
@@ -507,18 +579,31 @@ def section3_confounding(df, R_baseline):
         f"**Sensitivity parameter rho\\* = {rho_star:.4f}**: an unmeasured "
         "confounder of the mediator (Stress_Score) and outcome (Sleep_Hours) "
         "relationship would have to induce a residual correlation of "
-        f"approximately {abs(rho_star):.2f} in magnitude to fully explain "
-        "away the indirect effect (drive it to exactly zero). For context, "
-        "residual correlations of unmeasured psychosocial confounders "
-        "(e.g., chronotype, screen exposure, trait anxiety) reported in "
-        "comparable mediation literature are typically in the 0.1-0.3 "
-        f"range; a required |rho*| of {abs(rho_star):.2f} is therefore "
-        + ("large relative to plausible confounding and suggests the "
-           "indirect effect is reasonably robust to unmeasured confounding."
-           if abs(rho_star) > 0.3 else
-           "not implausibly large, so the indirect effect should be "
-           "interpreted cautiously with respect to unmeasured confounding.")
-        + "\n"
+        f"approximately {abs(rho_star):.2f} in magnitude, between the path-a "
+        "and outcome-model residuals, to drive the indirect effect exactly to "
+        "zero.\n\n"
+        + ("Because a correlation coefficient is mathematically bounded in "
+           "[-1, 1], no unmeasured mediator-outcome confounder operating "
+           "solely through this residual-correlation channel could fully "
+           "explain away the indirect effect reported here, even at the "
+           f"theoretical maximum |rho| = 1: the requirement of "
+           f"{abs(rho_star):.2f} lies outside the admissible range. This is a "
+           "bounded and therefore comparatively strong form of robustness "
+           "evidence."
+           if abs(rho_star) > 1 else
+           f"A required |rho*| of {abs(rho_star):.2f} is within the "
+           "admissible range for a correlation, so a sufficiently strong "
+           "unmeasured mediator-outcome confounder could in principle drive "
+           "the indirect effect to zero; the indirect effect should be "
+           "interpreted with that possibility in mind.")
+        + "\n\nTwo caveats apply in either case. First, this is a "
+          "single-parameter model: it assumes a linear, additive confounding "
+          "channel operating through the correlation of the two error terms, "
+          "and says nothing about confounding that acts through a different "
+          "functional form, through the exposure-mediator relationship, or "
+          "through several weak confounders acting together. Second, it is a "
+          "sensitivity statement about the estimated model, not a claim that "
+          "no confounding exists.\n"
     )
     lines.append("### Bias-adjusted indirect effect across a grid of assumed confounder strengths (rho)\n")
     lines.append(sens_df.to_markdown(index=False, floatfmt=".6f"))

@@ -12,7 +12,7 @@ Direction and significance of a, b, c, c' are unchanged across raw/1.5xIQR/3xIQR
 
 ## 3. Confounding & reverse-causation sensitivity (this work)
 
-A reverse-ordering model (Caffeine -> Sleep -> Stress) is also statistically consistent with the data (indirect effect 0.002152, CI [0.001936, 0.002371]) -- directionality is assumed from theory, not identified by the design. An unmeasured confounder would need residual correlation |rho| >= 1.26 with both the mediator- and outcome-model residuals to fully explain away the indirect effect. See `confounding_sensitivity.md`.
+A reverse-ordering model (Caffeine -> Sleep -> Stress) is also statistically consistent with the data (indirect effect 0.002152, CI [0.001925, 0.002368]) -- directionality is assumed from theory, not identified by the design. An unmeasured confounder would need residual correlation |rho| >= 1.26 with both the mediator- and outcome-model residuals to fully explain away the indirect effect. See `confounding_sensitivity.md`.
 
 ## 4. External validation against independent datasets (pre-existing work)
 

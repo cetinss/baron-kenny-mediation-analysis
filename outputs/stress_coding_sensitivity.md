@@ -8,20 +8,20 @@
 
 | Scheme                                      |   a (X->M) |      a_p |   b (M->Y|X) |      b_p |   Indirect (a*b) |   95% CI lo |   95% CI hi | CI excl. 0   |   % mediated |
 |:--------------------------------------------|-----------:|---------:|-------------:|---------:|-----------------:|------------:|------------:|:-------------|-------------:|
-| Baseline equal-interval (2/5/8)             |   0.002121 | 0.000000 |    -0.481648 | 0.000000 |        -0.001021 |   -0.001160 |   -0.000887 | True         |    60.564047 |
-| Equal-interval, unit scale (1/2/3)          |   0.000707 | 0.000000 |    -1.444944 | 0.000000 |        -0.001021 |   -0.001162 |   -0.000891 | True         |    60.564047 |
-| Non-equal interval, compressed-low (1/3/9)  |   0.002268 | 0.000000 |    -0.369706 | 0.000000 |        -0.000838 |   -0.000961 |   -0.000706 | True         |    49.705225 |
-| Non-equal interval, compressed-high (1/7/9) |   0.003388 | 0.000000 |    -0.305584 | 0.000000 |        -0.001035 |   -0.001170 |   -0.000896 | True         |    61.382799 |
+| Baseline equal-interval (2/5/8)             |   0.002121 | 0.000000 |    -0.481648 | 0.000000 |        -0.001021 |   -0.001149 |   -0.000884 | True         |    60.564898 |
+| Equal-interval, unit scale (1/2/3)          |   0.000707 | 0.000000 |    -1.444944 | 0.000000 |        -0.001021 |   -0.001149 |   -0.000884 | True         |    60.564898 |
+| Non-equal interval, compressed-low (1/3/9)  |   0.002268 | 0.000000 |    -0.369703 | 0.000000 |        -0.000838 |   -0.000957 |   -0.000718 | True         |    49.705395 |
+| Non-equal interval, compressed-high (1/7/9) |   0.003388 | 0.000000 |    -0.305586 | 0.000000 |        -0.001035 |   -0.001165 |   -0.000902 | True         |    61.384164 |
 
 ## Indicator (dummy) coding - Low as reference
 No numeric spacing assumed; Medium and High enter as separate indicator mediators in a linear-probability path-a model and a multiple-mediator path-b model.
 
 - Path a (Caffeine -> P(Medium)): a = 0.000280, p = <0.001 (***)
 - Path a (Caffeine -> P(High)):   a = 0.000213, p = <0.001 (***)
-- Path b (Medium -> Sleep | X, High): b = -1.646111, p = <0.001 (***)
-- Path b (High -> Sleep | X, Medium): b = -2.722989, p = <0.001 (***)
-- Indirect effect via Medium: -0.000461, 95% CI [-0.000561, -0.000363] (excludes 0)
-- Indirect effect via High:   -0.000581, 95% CI [-0.000701, -0.000463] (excludes 0)
+- Path b (Medium -> Sleep | X, High): b = -1.646164, p = <0.001 (***)
+- Path b (High -> Sleep | X, Medium): b = -2.722945, p = <0.001 (***)
+- Indirect effect via Medium: -0.000461, 95% CI [-0.000553, -0.000364] (excludes 0)
+- Indirect effect via High:   -0.000581, 95% CI [-0.000695, -0.000464] (excludes 0)
 
 ## Native-ordinal path-a model (proportional-odds logit)
 Treating the mediator in its native ordinal form (no numeric spacing assumed at all): caffeine intake predicts higher perceived-stress category with a proportional-odds coefficient of 0.002387 (p = <0.001, ***), consistent in sign and significance with the linear path-a estimate under every numeric coding tested above.

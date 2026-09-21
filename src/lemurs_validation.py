@@ -208,7 +208,12 @@ def run_mediation(df, cov_col="activity_days", label="PRIMARY"):
     C = df[[cov_col]].values.astype(float)
     n = len(df)
 
-    # Mean-center continuous predictors
+    # Mean-center continuous predictors. In a model with no interaction or
+    # product terms, centring shifts only the intercepts: every slope (a, b,
+    # c, c') and therefore the indirect effect are numerically identical to
+    # the uncentred main analysis in src/main.py. Centring is kept here for
+    # interpretability of the intercepts, and tests/test_mediation.py asserts
+    # the invariance (Reviewer 3: text and code must agree on this point).
     Xc = X - X.mean()
     Mc = M - M.mean()
     Cc = C - C.mean(axis=0)

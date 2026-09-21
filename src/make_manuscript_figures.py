@@ -54,7 +54,9 @@ FIG_DIR.mkdir(exist_ok=True)
 
 SEED = 42
 N_BOOTSTRAP = 5000
-COVS = ["Age", "Gender_Num", "BMI", "Physical_Activity_Hours", "Heart_Rate"]
+# Same covariate set as the main analysis (corrected gender coding), so a
+# figure and a table can never be drawn from different specifications.
+COVS = list(bk.DEFAULT_COVARIATES)
 
 # Reference number of Baron & Kenny (1986) in the revised reference list.
 BK_REF = 20
