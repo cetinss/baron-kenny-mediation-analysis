@@ -1,0 +1,8 @@
+n,Source,Fit seconds,Bootstrap seconds (B=500),Bootstrap us per replicate
+500,analytic sample (subsampled),0.0032,0.092,184.5
+1000,analytic sample (subsampled),0.0037,0.129,258.9
+2500,analytic sample (subsampled),0.0061,0.354,708.8
+5000,analytic sample (subsampled),0.0079,0.567,1134.5
+9795,analytic sample (subsampled),0.0156,1.006,2012.2
+25000,simulated,0.0299,2.733,5465.7
+100000,simulated,0.1153,12.612,25223.1

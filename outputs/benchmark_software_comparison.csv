@@ -1,0 +1,5 @@
+Software,Estimator,Indirect effect (per 100 mg),95% CI low,95% CI high,Direct effect (per 100 mg),Total effect (per 100 mg),Monte Carlo SE,Seconds
+"bkmediation 1.0.0 (this package, B=1000)",OLS paths + percentile bootstrap,-0.10214611782129811,-0.11500370729914018,-0.08836447029034054,-0.06650952344664222,-0.1686556412679487,,
+"statsmodels OLS (formula API), product of coefficients","closed form, no resampling",-0.10214611782130062,,,-0.06650952344663501,-0.1686556412679327,,0.035
+statsmodels.stats.mediation.Mediation (n_rep=1000),Imai-Keele-Tingley parametric simulation,-0.10187104653279534,-0.13024802106154285,-0.07339070678515514,-0.06647658503235383,-0.16834763156514918,0.00045866993559539167,67.2
+pingouin.mediation_analysis (n_boot=1000),Preacher-Hayes percentile bootstrap,-0.10214611782129979,-0.11497918030752781,-0.08827595596143326,-0.06650952344663363,,,3.79
