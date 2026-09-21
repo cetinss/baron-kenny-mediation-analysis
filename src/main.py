@@ -1,6 +1,6 @@
 """
 ================================================================================
-Baron-Kenny Mediation Analysis
+Baron-Kenny Mediation Analysis - manuscript entry point
 Caffeine Intake -> Perceived Stress -> Sleep Duration
 
 Research Question
@@ -8,11 +8,30 @@ Research Question
 Does perceived stress mediate the relationship between daily caffeine
 intake and sleep duration?
 
-Design       : Cross-sectional, observational (synthetic data)
-Dataset      : Global Coffee Health - Synthetic (Kaggle, n = 10 000)
+Hypotheses (see bkmediation.hypotheses for the decision rules)
+-------------------------------------------------------------
+  H1  Higher daily caffeine intake is associated with shorter sleep duration.
+  H2  Higher daily caffeine intake is associated with higher perceived stress.
+  H3  Perceived stress mediates the caffeine-sleep association.
+
+Design       : Cross-sectional, observational, SYNTHETIC data
+Dataset      : Global Coffee Health - Synthetic (Kaggle, n = 10,000)
 Framework    : Baron & Kenny (1986) four-step approach
-CI method    : Percentile bootstrap (5 000 resamples)
+CI method    : Percentile bootstrap (5,000 resamples), HC3 robust SEs
 Outcome      : Sleep Duration (hours)  [single DV]
+
+What lives where
+----------------
+The statistics live in the installable package `bkmediation` (src/bkmediation),
+which is documented and covered by the test suite under tests/. This script is
+the manuscript-facing entry point: it calls the package and then draws the six
+report figures. Running it and running `python -m bkmediation analyze` produce
+the same numbers, because both call the same functions.
+
+Because the primary dataset is synthetic - and its stress variable was
+generated partly from sleep- and lifestyle-related information - everything
+below is a statistical demonstration of the analysis pipeline, not evidence
+about a biological mechanism.
 
 Authors      : Sena Cetin & Elif Beyza Oztoprak
 Affiliation  : Turkish-German University
@@ -33,8 +52,21 @@ import statsmodels.api as sm
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 from statsmodels.stats.stattools import durbin_watson
 from pathlib import Path
+import sys
 import warnings
 warnings.filterwarnings("ignore")
+
+# The analysis itself lives in the package next to this file.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from bkmediation import evaluate_hypotheses  # noqa: E402
+from bkmediation.config import DEFAULT_COVARIATES  # noqa: E402
+from bkmediation.data import build_analytic_sample  # noqa: E402
+from bkmediation.data import remove_outliers_iqr as _pkg_remove_outliers  # noqa: E402
+from bkmediation.descriptives import key_correlations  # noqa: E402
+from bkmediation.diagnostics import run_diagnostics  # noqa: E402
+from bkmediation.mediation import run_mediation as _pkg_run_mediation  # noqa: E402
+from bkmediation.provenance import write_provenance  # noqa: E402
+from bkmediation.reporting import write_analysis_outputs  # noqa: E402
 
 # ---- CONFIGURATION ----------------------------------------------------------
 np.random.seed(42)
@@ -74,72 +106,30 @@ _sig = lambda p: "***" if p < .001 else "**" if p < .01 else "*" if p < .05 else
 # =============================================================================
 
 def load_and_clean_data():
-    """
-    Load the Global Coffee Health dataset and prepare an analytic sample.
+    """Build the analytic sample (delegates to bkmediation.data).
 
-    KEY FIX (vs. previous version)
-    ------------------------------
-    The earlier pipeline mapped Sleep_Quality -> numeric (Poor/Fair/Good)
-    but the raw data also contains the 'Excellent' category, which had no
-    mapping, producing NaN.  Because Sleep_Quality_Score was among the
-    mandatory key_vars, those ~1 500 rows were silently dropped.
-
-    Since our sole DV is Sleep Duration (hours), we no longer create or
-    require Sleep_Quality_Score.  This retains the full sample after the
-    standard age and outlier filters.
+    Returns the cleaned DataFrame. The frame carries both the corrected
+    gender indicators (`Gender_Male`, `Gender_Other`) and the legacy
+    `Gender_Num` column, so the external-validation and sensitivity scripts
+    that ask for `Gender_Num` by name keep working.
     """
     print("=" * 70)
     print("STEP 1: DATA LOADING AND CLEANING")
     print("=" * 70)
-
-    raw = pd.read_csv(DATA_DIR / "synthetic_coffee_health_10000.csv")
-    print(f"Raw data loaded: {len(raw):,} records, {len(raw.columns)} variables")
-
-    df = raw.copy()
-
-    # Age filter (adults 18-65)
-    df = df[(df["Age"] >= 18) & (df["Age"] <= 65)]
-    print(f"After age filter (18-65): {len(df):,} records")
-
-    # Encode categoricals
-    stress_map = {"Low": 2, "Medium": 5, "High": 8}
-    df["Stress_Score"] = df["Stress_Level"].map(stress_map)
-    df["Gender_Num"] = (df["Gender"] == "Male").astype(int)
-
-    # Drop rows missing on analysis variables
-    # NOTE: Sleep_Quality_Score NOT included -> no data loss from "Excellent"
-    key_vars = [
-        "Caffeine_mg", "Stress_Score", "Sleep_Hours",
-        "Age", "Gender_Num", "BMI",
-        "Physical_Activity_Hours", "Heart_Rate",
-    ]
-    n_before = len(df)
-    df = df.dropna(subset=key_vars)
-    print(f"After missing-value removal: {len(df):,} (dropped {n_before - len(df)})")
-
-    # Outlier removal (IQR x 1.5)
-    continuous = ["Caffeine_mg", "Sleep_Hours", "BMI",
-                  "Heart_Rate", "Physical_Activity_Hours"]
-    df = _remove_outliers_iqr(df, continuous)
-
-    print(f"\nFinal analytic sample: n = {len(df):,}")
-    print(f"Total records removed: {len(raw) - len(df):,} "
-          f"({(len(raw) - len(df)) / len(raw) * 100:.1f}%)")
-    return df
+    sample = build_analytic_sample(verbose=True)
+    _LAST_SAMPLE["sample"] = sample
+    return sample.df
 
 
 def _remove_outliers_iqr(df, columns, k=1.5):
-    out = df.copy()
-    for col in columns:
-        Q1, Q3 = out[col].quantile([0.25, 0.75])
-        IQR = Q3 - Q1
-        lo, hi = Q1 - k * IQR, Q3 + k * IQR
-        before = len(out)
-        out = out[(out[col] >= lo) & (out[col] <= hi)]
-        rm = before - len(out)
-        if rm > 0:
-            print(f"  {col}: {rm} outliers removed (range: {lo:.1f} - {hi:.1f})")
+    """Backward-compatible wrapper around bkmediation.data.remove_outliers_iqr."""
+    out, _log = _pkg_remove_outliers(df, columns, k=k, verbose=True)
     return out
+
+
+# Set by load_and_clean_data so that run_mediation can reuse the sample
+# metadata (exclusion counts, synthetic flag) when it writes the reports.
+_LAST_SAMPLE = {}
 
 
 # =============================================================================
@@ -261,155 +251,69 @@ def check_assumptions(df):
 # 5.  BARON-KENNY MEDIATION ANALYSIS
 # =============================================================================
 
-def run_mediation(df):
-    """
-    Baron-Kenny (1986) mediation - single outcome: Sleep Duration.
+def run_mediation(df, covariates=None, n_boot=N_BOOTSTRAP, seed=42, cov_type="HC3"):
+    """Baron-Kenny mediation (delegates to bkmediation.mediation.run_mediation).
 
     X = Caffeine_mg   (independent)
-    M = Stress_Score   (mediator)
-    Y = Sleep_Hours    (dependent)
-    C = covariates
+    M = Stress_Score  (mediator)
+    Y = Sleep_Hours   (dependent)
+    C = covariates (age, gender indicators, BMI, physical activity, heart rate)
 
-    Steps:
-      1. Total effect:  Y = b0 + c*X  + g'C + e
-      2. Path a:        M = a0 + a*X  + d'C + v
-      3-4. b + direct:  Y = t0 + c'*X + b*M + f'C + h
+        Step 1  Y = i1 + c*X  + g'C            (total effect)
+        Step 2  M = i2 + a*X  + d'C            (path a)
+        Step 3  Y = i3 + c'*X + b*M + f'C      (path b and direct effect)
 
-    Indirect effect = a * b
-    95% CI = percentile bootstrap (N_BOOTSTRAP resamples)
+    Reported for every path: HC3 robust SE, t, p, a 95% model-based interval
+    and a 95% percentile-bootstrap interval. The primary inferential statement
+    is the bootstrap interval for the indirect effect a*b; the proportion
+    mediated is reported with its own bootstrap interval.
+
+    Returns the legacy result dictionary the figure functions below expect,
+    extended with the new interval keys.
     """
     print("\n" + "=" * 70)
     print("STEP 5: BARON-KENNY MEDIATION ANALYSIS - Sleep Duration")
     print("=" * 70)
 
-    covs = ["Age", "Gender_Num", "BMI", "Physical_Activity_Hours", "Heart_Rate"]
-    X = df["Caffeine_mg"].values
-    M = df["Stress_Score"].values
-    Y = df["Sleep_Hours"].values
-    C = df[covs].values
-    n = len(df)
-
-    # Step 1: Total effect
-    X1 = sm.add_constant(np.column_stack([X, C]))
-    m1 = sm.OLS(Y, X1).fit()
-    c, c_se, c_t, c_p = m1.params[1], m1.bse[1], m1.tvalues[1], m1.pvalues[1]
-    r2_1, r2_1a = m1.rsquared, m1.rsquared_adj
-    f1, f1_p = m1.fvalue, m1.f_pvalue
-
-    print(f"\n  Step 1 - Total Effect  Y = c*X + C")
-    print(f"    c  = {c:.6f}   SE = {c_se:.6f}   t = {c_t:.3f}   p = {c_p:.2e} {_sig(c_p)}")
-    print(f"    R2 = {r2_1:.4f}   Adj R2 = {r2_1a:.4f}   F = {f1:.2f}   p(F) = {f1_p:.2e}")
-
-    # Step 2: Path a (X -> M)
-    X2 = sm.add_constant(np.column_stack([X, C]))
-    m2 = sm.OLS(M, X2).fit()
-    a, a_se, a_t, a_p = m2.params[1], m2.bse[1], m2.tvalues[1], m2.pvalues[1]
-    r2_2 = m2.rsquared
-
-    print(f"\n  Step 2 - Path a  M = a*X + C")
-    print(f"    a  = {a:.6f}   SE = {a_se:.6f}   t = {a_t:.3f}   p = {a_p:.2e} {_sig(a_p)}")
-    print(f"    R2 = {r2_2:.4f}")
-
-    # Step 3-4: Path b + Direct effect
-    X3 = sm.add_constant(np.column_stack([X, M, C]))
-    m3 = sm.OLS(Y, X3).fit()
-    cp, cp_se, cp_t, cp_p = m3.params[1], m3.bse[1], m3.tvalues[1], m3.pvalues[1]
-    b, b_se, b_t, b_p = m3.params[2], m3.bse[2], m3.tvalues[2], m3.pvalues[2]
-    r2_3, r2_3a = m3.rsquared, m3.rsquared_adj
-    f3, f3_p = m3.fvalue, m3.f_pvalue
-
-    print(f"\n  Step 3-4 - Direct effect + Path b   Y = c'*X + b*M + C")
-    print(f"    c' = {cp:.6f}   SE = {cp_se:.6f}   t = {cp_t:.3f}   p = {cp_p:.2e} {_sig(cp_p)}")
-    print(f"    b  = {b:.6f}    SE = {b_se:.6f}   t = {b_t:.3f}   p = {b_p:.2e} {_sig(b_p)}")
-    print(f"    R2 = {r2_3:.4f}   Adj R2 = {r2_3a:.4f}   F = {f3:.2f}   p(F) = {f3_p:.2e}")
-
-    # Indirect effect & Sobel
-    ab = a * b
-    sob_se = np.sqrt(a**2 * b_se**2 + b**2 * a_se**2)
-    sob_z = ab / sob_se if sob_se > 0 else 0
-    sob_p = 2 * (1 - stats.norm.cdf(abs(sob_z)))
-
-    # Percentile bootstrap CI
-    print(f"\n  Bootstrap ({N_BOOTSTRAP:,} resamples) ...")
-    boot = np.empty(N_BOOTSTRAP)
-    ok = 0
-    for _ in range(N_BOOTSTRAP):
-        idx = np.random.choice(n, n, replace=True)
-        Xb, Mb, Yb, Cb = X[idx], M[idx], Y[idx], C[idx]
-        try:
-            a_b = sm.OLS(Mb, sm.add_constant(np.column_stack([Xb, Cb]))).fit().params[1]
-            b_b = sm.OLS(Yb, sm.add_constant(np.column_stack([Xb, Mb, Cb]))).fit().params[2]
-            boot[ok] = a_b * b_b
-            ok += 1
-        except Exception:
-            continue
-    boot = boot[:ok]
-    ci_lo = np.percentile(boot, 2.5)
-    ci_hi = np.percentile(boot, 97.5)
-    ci_sig = not (ci_lo <= 0 <= ci_hi)
-
-    # Baron-Kenny conditions
-    cond = [c_p < ALPHA, a_p < ALPHA, b_p < ALPHA, abs(cp) < abs(c)]
-    all_ok = all(cond)
-    if all_ok and ci_sig:
-        med_type = "FULL MEDIATION" if cp_p >= ALPHA else "PARTIAL MEDIATION"
+    sample = _LAST_SAMPLE.get("sample")
+    if sample is not None and sample.df.equals(df):
+        target = sample
     else:
-        med_type = "NO MEDIATION"
-    prop = (ab / c * 100) if c != 0 else 0
+        target = df
+    covariates = covariates or (sample.covariates if sample is not None
+                                else list(DEFAULT_COVARIATES))
 
-    # Standardised coefficients
-    sx, sm_, sy = X.std(), M.std(), Y.std()
-    a_std = a * sx / sm_
-    b_std = b * sm_ / sy
-    c_std = c * sx / sy
-    cp_std = cp * sx / sy
-    ab_std = a_std * b_std
-    f2 = (r2_3 - r2_1) / (1 - r2_3) if r2_3 < 1 else np.nan
+    result = _pkg_run_mediation(target, covariates=covariates, n_boot=n_boot,
+                                seed=seed, cov_type=cov_type)
 
-    # Print summary
-    print(f"\n  {'=' * 60}")
-    print(f"  INDIRECT EFFECT  (a x b) = {ab:.6f}")
-    print(f"  95% Percentile Bootstrap CI: [{ci_lo:.6f}, {ci_hi:.6f}]")
-    print(f"  CI excludes zero: {'Yes' if ci_sig else 'No'}")
-    print(f"  Sobel Z = {sob_z:.3f}  p = {sob_p:.2e}")
-    print(f"  Proportion mediated = {prop:.1f}%")
-    print(f"  {'=' * 60}")
-    print(f"  Standardised:  a={a_std:.4f}  b={b_std:.4f}  "
-          f"c={c_std:.4f}  c'={cp_std:.4f}  ab={ab_std:.4f}")
-    print(f"  Cohen's f2 (mediator addition) = {f2:.4f}")
-    print(f"  {'=' * 60}")
-    print(f"  Baron-Kenny Conditions:")
-    labels = ["c sig (X->Y)", "a sig (X->M)", "b sig (M->Y|X)", "|c'|<|c|"]
-    pvals = [c_p, a_p, b_p, None]
-    for i, (lb, cd) in enumerate(zip(labels, cond)):
-        pstr = f"  p = {pvals[i]:.2e}" if pvals[i] is not None else ""
-        print(f"    {i+1}. {lb:25s} {'PASS' if cd else 'FAIL'}{pstr}")
-    print(f"\n  => CONCLUSION: {med_type}")
+    print()
+    print(result.summary())
+
+    print("\n  Baron-Kenny conditions:")
+    labels = {
+        "c_significant": "c significant (X->Y)",
+        "a_significant": "a significant (X->M)",
+        "b_significant": "b significant (M->Y|X)",
+        "direct_effect_reduced": "|c'| < |c|",
+    }
+    for key, met in result.conditions.items():
+        print(f"    {labels[key]:28s} {'PASS' if met else 'FAIL'}")
+
+    print("\n  Hypothesis tests:")
+    for _, row in evaluate_hypotheses(result).iterrows():
+        print(f"    {row['Hypothesis']}  {row['Decision']:14s} "
+              f"per 100 mg: {row['Estimate (per 100 mg)']:+.4f}  "
+              f"95% CI [{row['95% CI low (per 100 mg)']:+.4f}, "
+              f"{row['95% CI high (per 100 mg)']:+.4f}]  ({row['CI method']})")
     print("=" * 70)
 
-    R = dict(
-        n=n,
-        a=a, a_se=a_se, a_t=a_t, a_p=a_p, a_std=a_std,
-        b=b, b_se=b_se, b_t=b_t, b_p=b_p, b_std=b_std,
-        c=c, c_se=c_se, c_t=c_t, c_p=c_p, c_std=c_std,
-        cp=cp, cp_se=cp_se, cp_t=cp_t, cp_p=cp_p, cp_std=cp_std,
-        ab=ab, ab_std=ab_std,
-        ci_lo=ci_lo, ci_hi=ci_hi, ci_sig=ci_sig,
-        sob_z=sob_z, sob_p=sob_p,
-        r2_total=r2_1, r2_total_adj=r2_1a, f_total=f1, f_total_p=f1_p,
-        r2_a=r2_2,
-        r2_med=r2_3, r2_med_adj=r2_3a, f_med=f3, f_med_p=f3_p,
-        f2=f2, prop=prop,
-        cond=cond, all_ok=all_ok, med_type=med_type,
-        boot=boot, model1=m1, model2=m2, model3=m3,
-    )
+    if sample is not None:
+        written = write_analysis_outputs(sample, result, REPORTS_DIR)
+        print(f"\nSaved -> {', '.join(sorted(written))}")
+        write_provenance(PROJECT_DIR / "outputs")
 
-    # Save CSV
-    skip = {"boot", "model1", "model2", "model3", "cond"}
-    row = {k: v for k, v in R.items() if k not in skip}
-    row["cond1"], row["cond2"], row["cond3"], row["cond4"] = cond
-    pd.DataFrame([row]).to_csv(REPORTS_DIR / "mediation_results.csv", index=False)
-    print(f"\nSaved -> mediation_results.csv")
+    R = result.legacy_dict()
+    R["result"] = result
     return R
 
 
@@ -945,7 +849,11 @@ def fig6_summary(R):
             f"R2 (Total-Effect Model):  {R['r2_total']:.4f}\n"
             f"R2 (Mediated Model):      {R['r2_med']:.4f}\n\n"
             f"Delta R2 (mediator):      {R['r2_med'] - R['r2_total']:.4f}\n"
-            f"Cohen's f2:               {R['f2']:.4f}\n\n"
+            f"f2 (variance increment):  {R['f2']:.4f}\n"
+            f"  not a mediation effect size\n"
+            f"Indirect effect (std):    {R['ab_std']:.4f}\n"
+            f"Prop. mediated:           {R['prop']:.1f}%\n"
+            f"  95% CI [{R['prop_ci'][0]:.1f}%, {R['prop_ci'][1]:.1f}%]\n\n"
             f"Sample Size:  n = {R['n']:,}\n"
             f"Bootstrap:    B = {N_BOOTSTRAP:,}")
     ax.text(0.5, 0.5, qtxt, transform=ax.transAxes, fontsize=10,

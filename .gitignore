@@ -6,6 +6,12 @@ __pycache__/
 .venv/
 venv/
 
+# Packaging / tooling
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
 # Output artifacts
 Reports/
 *.png
@@ -19,3 +25,13 @@ Reports/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Internal revision working documents (reviewer comments and response drafts
+# are confidential; they stay out of the public repository)
+REVISION_CHECKLIST.md
+VSCODE_CONTINUATION_PROMPT.md
+REVIEWER3_STATUS.md
+EDITORIAL_REVIEW.md
+
+# NHANES individual-foods recall file: 73 MB and not read by any script here
+data/nhanes/DR1IFF_J.XPT
