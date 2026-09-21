@@ -54,10 +54,15 @@ class TestAnalysisReport:
     @staticmethod
     def written(tmp_path_factory, analytic_sample, analytic_result):
         out = tmp_path_factory.mktemp("reports")
-        return write_analysis_outputs(analytic_sample, analytic_result, out), out
+        copy_dir = tmp_path_factory.mktemp("outputs")
+        # markdown_copy_dir defaults to the project's outputs/ directory; point
+        # it at a temporary one so running the tests never rewrites the
+        # committed reports with low-resample test values.
+        return write_analysis_outputs(analytic_sample, analytic_result, out,
+                                      markdown_copy_dir=copy_dir), (out, copy_dir)
 
     def test_every_expected_artefact_is_written(self, written):
-        files, out = written
+        files, (out, _copy_dir) = written
         for name in ("descriptive_statistics.csv", "correlation_matrix.csv",
                      "mediation_results.csv", "mediation_paths_table.csv",
                      "mediation_effects_table.csv", "hypothesis_tests.csv",
@@ -68,7 +73,7 @@ class TestAnalysisReport:
             assert (out / name).stat().st_size > 0
 
     def test_results_csv_contains_the_confidence_limits(self, written):
-        _, out = written
+        _, (out, _copy_dir) = written
         row = pd.read_csv(out / "mediation_results.csv").iloc[0]
         for path in ("a", "b", "c", "cp"):
             assert f"{path}_ci_lo" in row.index
@@ -91,6 +96,11 @@ class TestAnalysisReport:
         text = analysis_markdown(analytic_sample, analytic_result)
         assert "Synthetic data" in text
         assert "not evidence of a biological mechanism" in text
+
+    def test_the_markdown_copy_goes_where_it_is_told(self, written):
+        files, (_out, copy_dir) = written
+        assert (copy_dir / "analysis_report.md").exists()
+        assert "outputs/analysis_report.md" in files
 
     def test_report_works_for_a_non_synthetic_sample(self, tmp_path):
         """The notice must disappear when the data are flagged as real."""
