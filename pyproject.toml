@@ -38,7 +38,7 @@ compare = ["pingouin>=0.5"]
 bkmediation = "bkmediation.cli:main"
 
 [project.urls]
-Repository = "https://github.com/elifbeyzaoztoprak/baron-kenny-mediation-analysis"
+Repository = "https://github.com/cetinss/baron-kenny-mediation-analysis"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
